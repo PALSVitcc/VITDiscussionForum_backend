@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'models',
 ]
 
+AUTH_USER_MODEL = "models.User"
+
 GRAPHENE = {
     "SCHEMA": "models.schema.schema"
 }

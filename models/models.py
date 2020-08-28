@@ -1,53 +1,47 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class User(models.Model):
-    name = models.CharField(max_length=256)
-    email = models.EmailField()
-    about = models.TextField()
-    rating = models.FloatField()
-    # bookmarks = models.ForeignKey(Question,on_delete=models.CASCADE)
-
+class Tags(models.Model):
+    name = models.CharField(max_length=100,unique=True)    
     def __str__(self):
         return self.name
 
+class User(AbstractUser):
+    about = models.TextField(
+        max_length=500,
+    )
+    rating = models.FloatField(default=0.0)
+    bookmarks = models.ManyToManyField(Tags)
+    def _str_(self):
+        return "{} - {} {} ({})".format(
+            self.username, self.first_name, self.last_name
+        )
 class Question(models.Model):
-    question = models.CharField(max_length=256)
-    author = models.ForeignKey(User,on_delete=models.CASCADE)
+    question = models.CharField(max_length=300)
+    author = models.ForeignKey(User,on_delete=models.CASCADE, related_name="Question_Author")
     timestamp = models.TimeField(auto_now=True)
+    
     def __str__(self):
         return self.question
 
 class Answer(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     question = models.ForeignKey(Question,on_delete=models.CASCADE)
-    answer = models.CharField(max_length=512)
-    upvotes = models.IntegerField()
-    downvotes = models.IntegerField()
+    answer = models.TextField(default="")
+    upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
+    timestamp = models.TimeField(auto_now=True)
 
     def __str__(self):
-        return  self.answer
+        return self.answer
 
-class AnswerReplie(models.Model):
-    replier = models.ForeignKey(User,on_delete=models.CASCADE)
-    reply = models.CharField(max_length=256)
+class AnswerReply(models.Model):
+    replier = models.ForeignKey(User,on_delete=models.CASCADE,related_name="reply_user")
+    reply = models.TextField()
     answer = models.ForeignKey(Answer,on_delete=models.CASCADE)
     time = models.TimeField(auto_now=True)
-    upvotes = models.IntegerField()
-    downvotes = models.IntegerField()
+    upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.reply
-
-class Tag(models.Model):
-    name = models.CharField(max_length=256)
-
-    def __str__(self):
-        return self.name
-
-class Bookmark(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    question = models.ForeignKey(Question,on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.user + self.question
-

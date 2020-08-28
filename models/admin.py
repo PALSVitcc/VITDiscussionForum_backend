@@ -6,6 +6,5 @@ from .models import *
 admin.site.register(User)
 admin.site.register(Question)
 admin.site.register(Answer)
-admin.site.register(AnswerReplie)
-admin.site.register(Tag)
-admin.site.register(Bookmark)
+admin.site.register(AnswerReply)
+admin.site.register(Tags)
