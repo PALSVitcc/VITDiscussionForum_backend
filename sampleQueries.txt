@@ -1,0 +1,46 @@
+{
+  allUser {
+    id
+    name
+    about
+    rating
+  }
+}
+
+{
+  allQuestion {
+    id
+    question
+    author{
+      id
+      name
+      about
+      rating   
+    }
+    timestamp
+  }
+}
+
+
+{
+  allAnswers {
+    id
+    user{
+      id
+      name
+      about
+      rating
+    }
+    question{
+      question
+      author{
+      id
+      name
+      about
+      rating
+      }
+    }
+    upvotes
+    downvotes
+  }
+}
