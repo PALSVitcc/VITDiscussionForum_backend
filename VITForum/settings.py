@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     #installed
     'graphene_django',
+    'models',
 ]
 
 MIDDLEWARE = [
