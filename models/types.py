@@ -5,7 +5,7 @@ from models.models import *
 class UserType(DjangoObjectType):
     class Meta:
         model = User
-        fields = ("id", "name", "about","rating")
+        fields = ("id","username" ,"first_name","last_name", "about","rating")
 
 class QuestionType(DjangoObjectType):
     class Meta:
