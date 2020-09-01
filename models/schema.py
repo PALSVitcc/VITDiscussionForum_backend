@@ -2,11 +2,12 @@ import graphene
 from graphene_django import DjangoObjectType
 from models.models import *
 from .types import *
+from .mutations import Mutation
 
 class UserQuery(graphene.ObjectType):
     all_user = graphene.List(UserType)
     category_by_name = graphene.Field(UserType, name=graphene.String(required=True))
-    def resolve_all_user(root, info):
+    def resolve_all_user(self,root, info):
         return User.objects.all()
     def resolve_category_by_name(root, info, name):
         try:
@@ -38,4 +39,4 @@ class QuestionQuery(graphene.ObjectType):
 class SuperClass(UserQuery,QuestionQuery,AnswerQuery):
     pass
 
-schema = graphene.Schema(query=SuperClass)
+schema = graphene.Schema(query=SuperClass,mutation=Mutation)

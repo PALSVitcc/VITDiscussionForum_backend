@@ -12,7 +12,7 @@ class User(AbstractUser):
         max_length=500,
     )
     rating = models.FloatField(default=0.0)
-    bookmarks = models.ManyToManyField(Tags)
+    bookmarks = models.ManyToManyField(Tags , blank=True)
     def _str_(self):
         return "{} - {} {} ({})".format(
             self.username, self.first_name, self.last_name
@@ -29,8 +29,8 @@ class Answer(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     question = models.ForeignKey(Question,on_delete=models.CASCADE)
     answer = models.TextField(default="")
-    upvotes = models.IntegerField()
-    downvotes = models.IntegerField()
+    upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
     timestamp = models.TimeField(auto_now=True)
 
     def __str__(self):
@@ -45,4 +45,4 @@ class AnswerReply(models.Model):
     downvotes = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.answer
+        return self.reply   

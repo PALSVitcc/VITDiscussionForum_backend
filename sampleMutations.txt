@@ -1,0 +1,14 @@
+mutation{
+  createUser(firstName:"abhishek",lastName:"kumkar," 
+    about:"i'm 4th year studemt",username:"avk2",password:"helloji&",email:"av2k@gmail.com"){
+    user{
+      id
+      firstName
+      lastName
+      username
+      about
+      password
+      rating
+    }
+  }
+}
