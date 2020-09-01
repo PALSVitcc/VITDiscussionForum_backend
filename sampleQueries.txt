@@ -27,7 +27,9 @@
     id
     user{
       id
-      name
+      firstName
+      lastName
+      username
       about
       rating
     }
@@ -35,7 +37,9 @@
       question
       author{
       id
-      name
+      firstName
+      lastName
+      username
       about
       rating
       }
