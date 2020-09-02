@@ -1,6 +1,8 @@
+from django.utils.timezone import datetime
 from django.contrib.auth import get_user_model
+from django.conf import settings
 import graphene
-from .models import *
+from models.models import *
 from .object_types import (
     TagsType,
     UserType,
@@ -134,8 +136,42 @@ class CreateUser(graphene.Mutation):
         return CreateUser(user=user,errors=None)
 
 
+class CreateQuestion(graphene.Mutation):
+    class Arguments:
+        question = graphene.String(required=True)
+    
+    ques = graphene.Field(QuestionType) 
+    errors = graphene.String()
+
+    def mutate(self,info,question=None):
+        user = info.context.user
+        if user:
+            try:
+                
+                questionInstance = Question(
+                    question=question,
+                    author=user,
+                    timestamp=datetime.now(pytz.timezone(settings.TIME_ZONE))
+                )
+                
+                questionInstance.full_clean()
+                questionInstance.save()
+                
+            except Exception as err:
+                return CreateQuestion(
+                    ques=None, errors=str(err)
+                )
+            return CreateQuestion(
+                ques=questionInstance, errors=None
+            )
+        return CreateQuestion(
+            ques=None, errors="Insufficient Privileges"
+        )
+            
+
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     create_tags = CreateTags.Field()
     update_tag = UpdateTag.Field()
     delete_tags = DeleteTags.Field()
+    create_question = CreateQuestion.Field()
