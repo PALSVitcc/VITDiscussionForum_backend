@@ -139,12 +139,27 @@ class CreateUser(graphene.Mutation):
 class CreateQuestion(graphene.Mutation):
     class Arguments:
         question = graphene.String(required=True)
+        tags = graphene.List(
+            graphene.NonNull(graphene.Int) ,required=True
+        )
     
     ques = graphene.Field(QuestionType) 
     errors = graphene.String()
 
-    def mutate(self,info,question=None):
+    def mutate(self,info,question=None,tags):
         user = info.context.user
+
+        tagsInstance = []
+
+        for tag in tags:
+            try:
+                tagInstance = Tags.objects.get(id=tag)
+                tagsInstance.append(tagInstance)
+            except Tags.DoesNotExist:
+                return CreateQuestion(
+                    ques=None,
+                    errors="Invalid Tag"
+                )
         if user:
             try:
                 
@@ -155,8 +170,11 @@ class CreateQuestion(graphene.Mutation):
                 )
                 
                 questionInstance.full_clean()
-                questionInstance.save()
                 
+                questionInstance.save()
+                questionInstance.tags.set(tagsInstance)
+                questionInstance.save()
+
             except Exception as err:
                 return CreateQuestion(
                     ques=None, errors=str(err)
@@ -167,7 +185,59 @@ class CreateQuestion(graphene.Mutation):
         return CreateQuestion(
             ques=None, errors="Insufficient Privileges"
         )
+
+class UpdateQuestion(graphene.Mutation):
+    class Arguments:
+        id=graphene.Int(required=True)
+        question=graphene.String(required=True)
+        tags = graphene.List(
+            graphene.NonNull(graphene.Int) ,required=True
+        )
+    
+    ques = graphene.Field(QuestionType) 
+    errors = graphene.String()
+
+    def mutate(self, info, id, question):
+        user = info.context.user
+
+        try:
+            questionInstance = Question.objects.get(id=id)
+        except Question.DoesNotExist:
+            return UpdateQuestion(
+                ques=None,
+                errors="Question Not Found"
+            )
+        
+        if questionInstance.author != user:
+            return UpdateQuestion(
+                ques=None,
+                errors="Not allowed to edit foreign question"
+            )
+        try:
+            if question:
+                questionInstance.question = question
             
+            if tags:
+                tagsInstance = []
+
+                for tag in tags:
+                    try:
+                        tagInstance = Tags.objects.get(id=tag)
+                        tagsInstance.append(tagInstance)
+                    except Tags.DoesNotExist:
+                        return CreateQuestion(
+                            ques=None,
+                            errors="Invalid Tag"
+                    )
+                questionInstance.tags.set(tagsInstance)
+            questionInstance.save()
+        except Exception as err:
+            return UpdateQuestion(
+                ques=None, errors=str(err)
+            )
+        return UpdateQuestion(ques=questionInstance, errors=None)
+
+
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()

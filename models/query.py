@@ -36,7 +36,7 @@ class Query(object):
         UserType,
         username=graphene.String(),
     )
-    # category_by_name = graphene.Field(UserType, name=graphene.String(required=True))
+    
     def resolve_all_user(self, info, **kwargs):
         username  = kwargs.get("username")
         userInstance = User.objects.all()
@@ -73,24 +73,3 @@ class Query(object):
             queryset = queryset.filter(author=kwargs.get("author"))
         
         return queryset
-# class AnswerQuery(graphene.ObjectType):
-#     all_answers = graphene.List(AnswerType)
-#     category_by_name = graphene.Field(AnswerType, name=graphene.String(required=True))
-#     def resolve_all_answers(root, info):
-#         return Answer.objects.all()
-#     def resolve_category_by_name(root, info, name):
-#         try:
-#             return Answer.objects.get(answer=name)
-#         except Answer.DoesNotExist:
-#             return None
-
-# class QuestionQuery(graphene.ObjectType):
-#     all_question = graphene.List(QuestionType)
-#     category_by_name = graphene.Field(QuestionType, name=graphene.String(required=True))
-#     def resolve_all_question(root, info):
-#         return Question.objects.all()
-#     def resolve_category_by_name(root, info, name):
-#         try:
-#             return Question.objects.get(question=name)
-#         except Question.DoesNotExist:
-#             return None
