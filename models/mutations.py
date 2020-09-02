@@ -238,6 +238,34 @@ class UpdateQuestion(graphene.Mutation):
         return UpdateQuestion(ques=questionInstance, errors=None)
 
 
+class DeleteQuestion(graphene.Mutation):
+    class Arguments:
+        id = graphene.Int(required=True)
+    
+    ques = graphene.Field(QuestionType) 
+    errors = graphene.String()
+
+    def mutate(self, info, id=None):
+        user = info.context.user
+
+        try:
+            questionInstance = Question.objects.get(id=id)
+        except Question.DoesNotExist:
+            return DeleteQuestion(
+                ques=None, errors="No such question found"
+            )
+        
+        if questionInstance.author != user:
+            return DeleteQuestion(
+                ques=None, errors="Not delete question from foreign authors"
+            )
+
+        try:
+            questionInstance.delete()
+        except Exception as err:
+            return DeleteQuestion(ques=None, errors=str(err))
+        return DeleteQuestion(ques=questionInstance,errors=None)
+
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
@@ -245,3 +273,5 @@ class Mutation(graphene.ObjectType):
     update_tag = UpdateTag.Field()
     delete_tags = DeleteTags.Field()
     create_question = CreateQuestion.Field()
+    update_question = UpdateQuestion.Field()
+    delete_question = DeleteQuestion.Field()
