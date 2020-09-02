@@ -21,7 +21,7 @@ class Query(object):
 
     def resolve_tags(self,info, **kwargs):
 
-        if info.context.user.is_anonymous:
+        if not info.context.user.is_anonymous:
             queryset = Tags.objects.all()
             if kwargs.get("ids"):
                 queryset.filter(id__in=kwargs.get("ids"))
