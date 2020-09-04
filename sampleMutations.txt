@@ -1,6 +1,7 @@
+User Signup
 mutation{
   createUser(firstName:"abhishek",lastName:"kumkar," 
-    about:"i'm 4th year studemt",username:"avk2",password:"helloji&",email:"av2k@gmail.com"){
+    about:"i'm 4th year studemt",username:"avk2",password:"helloji&",confirmPassword:"helloji&",email:"av2k@gmail.com"){
     user{
       id
       firstName
@@ -10,5 +11,73 @@ mutation{
       password
       rating
     }
+  }
+}
+
+Create Tag
+mutation{
+  createTags(name:"abhishek"){
+    tag{
+      id
+      name
+    }
+    errors
+  }
+}
+
+Update Tag
+mutation{
+  updateTag(id:1,name:"first"){
+    tag{
+      id
+      name
+    }
+    errors
+  }
+}
+
+Delete Tag
+mutation{
+  deleteTags(id:6){
+    errors
+  }
+}
+
+Create Question
+mutation{
+  createQuestion(question:"hello",tags:[1,2,3]) {
+    ques{
+      id
+      question
+      timestamp
+      author{
+        id
+        username
+      }
+    }
+    errors
+  }
+}
+
+Update Question
+mutation{
+  updateQuestion(id:2,question:"hello",tags:[1,2,3]) {
+    ques{
+      id
+      question
+      timestamp
+      author{
+        id
+        username
+      }
+    }
+    errors
+  }
+}
+
+Delete Question
+mutation{
+  deleteQuestion(id:2){
+    errors
   }
 }

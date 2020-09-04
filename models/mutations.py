@@ -2,6 +2,7 @@ from django.utils.timezone import datetime
 from django.contrib.auth import get_user_model
 from django.conf import settings
 import graphene
+import pytz
 from models.models import *
 from .object_types import (
     TagsType,
@@ -11,21 +12,17 @@ from .object_types import (
     AnswerReplyType
 )
 
-
 class CreateTags(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
     
     tag = graphene.Field(TagsType, name="tag")
     errors = graphene.String()
-
     def mutate(self, info, name=None):
         user = info.context.user
-
         is_existing = (
             True if len(Tags.objects.filter(name=name)) > 0 else False 
         )
-
         if is_existing:
             return CreateTags(
                 tag=None, 
@@ -63,8 +60,7 @@ class UpdateTag(graphene.Mutation):
             return UpdateTag(
                 tag=None,
                 errors="Tags Not Found"
-            )
-        
+            )        
         try:
             tagInstance.name = name
             tagInstance.save()
@@ -92,8 +88,7 @@ class DeleteTags(graphene.Mutation):
             return UpdateTag(
                 tag=None,
                 errors="Tags Not Found"
-            )
-        
+            )        
         try:
             tagInstance.delete()
         except Exception as err:
@@ -101,7 +96,6 @@ class DeleteTags(graphene.Mutation):
                 tag=None,
                 errors=str(err)
             )
-
         return UpdateTag(
                 tag=tagInstance,
                 errors=None
@@ -114,13 +108,18 @@ class CreateUser(graphene.Mutation):
         username = graphene.String(required=True)
         password = graphene.String(required=True)
         confirm_password = graphene.String(required=True)
-        email = graphene.String()
+        email = graphene.String(required=True)
         about = graphene.String()   
 
     user = graphene.Field(UserType)
     errors = graphene.String()     
 
-    def mutate(self, info, username, password,last_name,first_name,confirm_password, email=None,about=None):
+    def mutate(self, info, username, password,last_name,first_name,confirm_password, email,about=None):
+        if(User.objects.filter(email=email)):
+            return CreateUser(user=None, errors="Email already taken")
+        
+        if(User.objects.filter(username=username)):
+            return CreateUser(user=None, errors="Username already taken")
 
         if password != confirm_password:
             return CreateUser(user=None, errors="Paswords Do Not Match")
@@ -146,11 +145,9 @@ class CreateQuestion(graphene.Mutation):
     ques = graphene.Field(QuestionType) 
     errors = graphene.String()
 
-    def mutate(self,info,question=None,tags):
+    def mutate(self,info,tags,question=None):
         user = info.context.user
-
         tagsInstance = []
-
         for tag in tags:
             try:
                 tagInstance = Tags.objects.get(id=tag)
@@ -161,20 +158,16 @@ class CreateQuestion(graphene.Mutation):
                     errors="Invalid Tag"
                 )
         if user:
-            try:
-                
+            try:                
                 questionInstance = Question(
                     question=question,
                     author=user,
                     timestamp=datetime.now(pytz.timezone(settings.TIME_ZONE))
-                )
-                
-                questionInstance.full_clean()
-                
+                )                
+                questionInstance.full_clean()                
                 questionInstance.save()
                 questionInstance.tags.set(tagsInstance)
                 questionInstance.save()
-
             except Exception as err:
                 return CreateQuestion(
                     ques=None, errors=str(err)
@@ -197,17 +190,15 @@ class UpdateQuestion(graphene.Mutation):
     ques = graphene.Field(QuestionType) 
     errors = graphene.String()
 
-    def mutate(self, info, id, question):
+    def mutate(self, info,tags, id, question):
         user = info.context.user
-
         try:
             questionInstance = Question.objects.get(id=id)
         except Question.DoesNotExist:
             return UpdateQuestion(
                 ques=None,
                 errors="Question Not Found"
-            )
-        
+            )        
         if questionInstance.author != user:
             return UpdateQuestion(
                 ques=None,
@@ -215,11 +206,9 @@ class UpdateQuestion(graphene.Mutation):
             )
         try:
             if question:
-                questionInstance.question = question
-            
+                questionInstance.question = question            
             if tags:
                 tagsInstance = []
-
                 for tag in tags:
                     try:
                         tagInstance = Tags.objects.get(id=tag)
@@ -247,19 +236,16 @@ class DeleteQuestion(graphene.Mutation):
 
     def mutate(self, info, id=None):
         user = info.context.user
-
         try:
             questionInstance = Question.objects.get(id=id)
         except Question.DoesNotExist:
             return DeleteQuestion(
                 ques=None, errors="No such question found"
-            )
-        
+            )        
         if questionInstance.author != user:
             return DeleteQuestion(
                 ques=None, errors="Not delete question from foreign authors"
             )
-
         try:
             questionInstance.delete()
         except Exception as err:
