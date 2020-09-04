@@ -21,7 +21,7 @@ class Question(models.Model):
     question = models.CharField(max_length=300)
     author = models.ForeignKey(User,on_delete=models.CASCADE, related_name="Question_Author")
     timestamp = models.TimeField(auto_now=True)
-    tags = models.ManyToManyField(Tags , blank=True)
+    tags = models.ManyToManyField(Tags)
     def __str__(self):
         return self.question
 

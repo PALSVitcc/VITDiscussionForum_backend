@@ -9,7 +9,6 @@ from .object_types import (
 )
 
 class Query(object):
-
     tags = graphene.List(
         TagsType,
         ids=graphene.List(
@@ -20,15 +19,14 @@ class Query(object):
     )
 
     def resolve_tags(self,info, **kwargs):
-
         if not info.context.user.is_anonymous:
             queryset = Tags.objects.all()
             if kwargs.get("ids"):
-                queryset.filter(id__in=kwargs.get("ids"))
+                queryset = queryset.filter(id__in=kwargs.get("ids"))
             if kwargs.get("name_iexact"):
-                queryset.filter(name__iexact=kwargs.get("name_iexact"))
+                queryset = queryset.filter(name__iexact=kwargs.get("name_iexact"))
             if kwargs.get("name_icontains"):
-                queryset.filter(name__icontains=kwargs.get("name_icontains"))
+                queryset = queryset.filter(name__icontains=kwargs.get("name_icontains"))
             return queryset
         return None
 
@@ -54,22 +52,15 @@ class Query(object):
         author=graphene.String()
     )
 
-    def resolve_questions(self,info,**kwargs):
-        
-        user=info.context.user
-        
+    def resolve_questions(self,info,**kwargs):       
+        user=info.context.user        
         queryset = Question.objects.all()
-
         if kwargs.get("ids"):
-            queryset = queryset.filter(id__in=kwargs.get("ids"))
-        
+            queryset = queryset.filter(id__in=kwargs.get("ids"))        
         if kwargs.get("question_iexact"):
             queryset = queryset.filter(question__iexact=kwargs.get("question_iexact"))
-
         if kwargs.get("question_icontains"):
             queryset = queryset.filter(question__icontains=kwargs.get("question_icontains"))
-
         if kwargs.get("author"):
-            queryset = queryset.filter(author=kwargs.get("author"))
-        
+            queryset = queryset.filter(author=kwargs.get("author"))        
         return queryset
